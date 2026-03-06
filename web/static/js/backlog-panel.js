@@ -11,7 +11,7 @@ const backlogPanel = (() => {
   const PRIORITY_BADGE = {
     high:   'bg-red-900 text-red-300',
     medium: 'bg-yellow-900 text-yellow-300',
-    low:    'bg-gray-700 text-gray-400',
+    low:    'bg-surface-hover text-content-muted',
   };
 
   const CATEGORY_BADGE = {
@@ -23,7 +23,7 @@ const backlogPanel = (() => {
   };
 
   const STATUS_BADGE = {
-    pending:     'bg-gray-700 text-gray-300',
+    pending:     'bg-surface-hover text-content-sec',
     approved:    'bg-green-900 text-green-300',
     in_progress: 'bg-blue-900 text-blue-300',
     done:        'bg-green-800 text-green-200',
@@ -33,7 +33,7 @@ const backlogPanel = (() => {
   };
 
   function _badge(map, key, fallback) {
-    return map[key] || fallback || 'bg-gray-700 text-gray-400';
+    return map[key] || fallback || 'bg-surface-hover text-content-muted';
   }
 
   function _moduleLabel(source) {
@@ -81,11 +81,11 @@ const backlogPanel = (() => {
     } else if (item.status === 'approved') {
       actions = `
         <button onclick="backlogPanel.updateStatus('${item.id}','pending','${item._source || ''}','${repo}')"
-                class="px-2 py-1 text-xs rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors">Revoke</button>`;
+                class="px-2 py-1 text-xs rounded bg-surface-hover hover:bg-surface-hover text-content-sec transition-colors">Revoke</button>`;
     } else if (item.status === 'rejected') {
       actions = `
         <button onclick="backlogPanel.updateStatus('${item.id}','pending','${item._source || ''}','${repo}')"
-                class="px-2 py-1 text-xs rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors">Reopen</button>`;
+                class="px-2 py-1 text-xs rounded bg-surface-hover hover:bg-surface-hover text-content-sec transition-colors">Reopen</button>`;
     } else if (item.status === 'failed') {
       actions = `
         <button onclick="backlogPanel.retryItem('${item.id}','${item._source || ''}','${repo}')"
@@ -100,15 +100,15 @@ const backlogPanel = (() => {
         const rows = metrics.map(m => {
           const bv = br.before[m] ?? '—';
           const av = br.after[m] ?? '—';
-          return `<span class="text-gray-400">${m}:</span> <span class="text-gray-200">${bv}</span>` +
-            `<span class="text-gray-500">→</span><span class="text-gray-200">${av}</span>`;
+          return `<span class="text-content-muted">${m}:</span> <span class="text-content-sec">${bv}</span>` +
+            `<span class="text-content-faint">→</span><span class="text-content-sec">${av}</span>`;
         }).join(' &middot; ');
-        backtestHtml = `<div class="mt-2 text-xs font-mono text-gray-400 bg-gray-900 rounded px-2 py-1">${rows}</div>`;
+        backtestHtml = `<div class="mt-2 text-xs font-mono text-content-muted bg-surface-base rounded px-2 py-1">${rows}</div>`;
       } else {
         const pairs = Object.entries(br).map(([k, v]) =>
-          `<span class="text-gray-400">${k}:</span> <span class="text-gray-200">${typeof v === 'object' ? JSON.stringify(v) : v}</span>`
+          `<span class="text-content-muted">${k}:</span> <span class="text-content-sec">${typeof v === 'object' ? JSON.stringify(v) : v}</span>`
         ).join(' &middot; ');
-        backtestHtml = `<div class="mt-2 text-xs font-mono text-gray-400 bg-gray-900 rounded px-2 py-1">${pairs}</div>`;
+        backtestHtml = `<div class="mt-2 text-xs font-mono text-content-muted bg-surface-base rounded px-2 py-1">${pairs}</div>`;
       }
     }
 
@@ -118,20 +118,20 @@ const backlogPanel = (() => {
 
     const descId = `backlog-desc-${item.id}`;
     return `
-      <div class="bg-gray-800 rounded-lg p-3 border border-gray-700 hover:border-gray-600 transition-colors">
+      <div class="bg-surface-raised rounded-lg p-3 border border-edge hover:border-edge-subtle transition-colors">
         <div class="flex flex-wrap gap-1 mb-1.5">
           <span class="px-1.5 py-0.5 rounded text-xs font-medium ${priorityCls}">${item.priority || 'low'}</span>
           ${item.category ? `<span class="px-1.5 py-0.5 rounded text-xs font-medium ${categoryCls}">${item.category}</span>` : ''}
           ${item.status ? `<span class="px-1.5 py-0.5 rounded text-xs font-medium ${statusCls}">${item.status}</span>` : ''}
           ${modBadge}
         </div>
-        <p class="text-sm font-semibold text-gray-100 mb-1"><span class="text-gray-500 font-mono">#${_esc(item.id)}</span> ${_esc(item.title || '')}</p>
-        <p id="${descId}" class="text-xs text-gray-400 line-clamp-2 cursor-pointer select-none"
+        <p class="text-sm font-semibold text-content mb-1"><span class="text-content-faint font-mono">#${_esc(item.id)}</span> ${_esc(item.title || '')}</p>
+        <p id="${descId}" class="text-xs text-content-muted line-clamp-2 cursor-pointer select-none"
            onclick="this.classList.toggle('line-clamp-2')">${_esc(item.description || '')}</p>
         ${item.rejected_reason ? `<p class="text-xs text-red-400 mt-1">Rejected${item.rejected_at ? ' ' + _fmtDate(item.rejected_at) : ''}: ${_esc(item.rejected_reason)}</p>` : ''}
         ${item.failed_reason ? `<p class="text-xs text-orange-400 mt-1">Failed${item.failed_at ? ' ' + _fmtDate(item.failed_at) : ''}${item.failed_count > 1 ? ' (' + item.failed_count + 'x)' : ''}: ${_esc(item.failed_reason)}</p>` : ''}
         ${item.revision_feedback ? `<p class="text-xs text-yellow-400 mt-1">Revision requested${item.revision_requested_at ? ' ' + _fmtDate(item.revision_requested_at) : ''}: ${_esc(item.revision_feedback)}</p>` : ''}
-        <p class="text-xs text-gray-600 mt-1">${_fmtDate(item.created)}</p>
+        <p class="text-xs text-content-faint mt-1">${_fmtDate(item.created)}</p>
         ${backtestHtml}
         ${actions ? `<div class="flex gap-2 mt-2">${actions}</div>` : ''}
       </div>`;
@@ -171,7 +171,7 @@ const backlogPanel = (() => {
 
   async function refresh() {
     const list = document.getElementById('backlog-list');
-    if (list) list.innerHTML = '<p class="text-xs text-gray-500">Loading...</p>';
+    if (list) list.innerHTML = '<p class="text-xs text-content-faint">Loading...</p>';
     try {
       // Fetch repos list on first load
       if (!_repos.length) {
@@ -219,7 +219,7 @@ const backlogPanel = (() => {
     }
 
     if (!visible.length) {
-      list.innerHTML = '<p class="text-xs text-gray-500">No items.</p>';
+      list.innerHTML = '<p class="text-xs text-content-faint">No items.</p>';
       return;
     }
     list.innerHTML = visible.map(_renderCard).join('');

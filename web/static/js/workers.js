@@ -36,7 +36,7 @@ function renderThreadEvents(threadId, events) {
   });
 
   if (!filtered.length) {
-    container.innerHTML = '<p class="text-xs text-slate-500">No events</p>';
+    container.innerHTML = '<p class="text-xs text-content-faint">No events</p>';
     return;
   }
 
@@ -75,15 +75,15 @@ function renderThreadEvents(threadId, events) {
 
   const parts = filtered.map(e => {
     const ts = fmtTime(e.timestamp);
-    const tsHtml = ts ? `<span class="text-slate-600 ml-2 text-xs">${ts}</span>` : '';
+    const tsHtml = ts ? `<span class="text-content-faint ml-2 text-xs">${ts}</span>` : '';
 
     if (e.type === 'assistant') {
       const text = String(e.content || '');
       const short = text.substring(0, 300);
       const hasMore = text.length > 300;
       const id = 'evt-more-' + Math.random().toString(36).slice(2);
-      return `<div class="py-2 px-3 my-1 bg-slate-700/50 rounded-lg">
-        <div class="text-sm text-slate-300">${escapeHtml(short)}${hasMore ? `<span id="${id}-short">… <button onclick="document.getElementById('${id}-short').style.display='none';document.getElementById('${id}-full').style.display='inline'" class="text-blue-400 hover:underline text-xs">Show more</button></span><span id="${id}-full" style="display:none">${escapeHtml(text.substring(300))}</span>` : ''}</div>
+      return `<div class="py-2 px-3 my-1 bg-surface-hover/50 rounded-lg">
+        <div class="text-sm text-content-sec">${escapeHtml(short)}${hasMore ? `<span id="${id}-short">… <button onclick="document.getElementById('${id}-short').style.display='none';document.getElementById('${id}-full').style.display='inline'" class="text-blue-400 hover:underline text-xs">Show more</button></span><span id="${id}-full" style="display:none">${escapeHtml(text.substring(300))}</span>` : ''}</div>
         ${tsHtml}
       </div>`;
     }
@@ -93,7 +93,7 @@ function renderThreadEvents(threadId, events) {
       const summary = toolSummary(e);
       return `<div class="py-1.5 px-3 my-0.5 flex items-center gap-2">
         <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-900/60 text-blue-300 border border-blue-700/50">${escapeHtml(name)}</span>
-        <span class="text-xs text-slate-400 truncate flex-1">${summary}</span>
+        <span class="text-xs text-content-muted truncate flex-1">${summary}</span>
         ${tsHtml}
       </div>`;
     }
@@ -103,8 +103,8 @@ function renderThreadEvents(threadId, events) {
       const short = text.substring(0, 500);
       const hasMore = text.length > 500;
       const id = 'tr-more-' + Math.random().toString(36).slice(2);
-      return `<div class="py-1 px-3 ml-6 my-0.5 border-l-2 border-slate-700">
-        <pre class="text-xs text-slate-500 whitespace-pre-wrap break-all">${escapeHtml(short)}${hasMore ? `<span id="${id}-short">… <button onclick="document.getElementById('${id}-short').style.display='none';document.getElementById('${id}-full').style.display='inline'" class="text-blue-400 hover:underline">Show more</button></span><span id="${id}-full" style="display:none">${escapeHtml(text.substring(500))}</span>` : ''}</pre>
+      return `<div class="py-1 px-3 ml-6 my-0.5 border-l-2 border-edge">
+        <pre class="text-xs text-content-faint whitespace-pre-wrap break-all">${escapeHtml(short)}${hasMore ? `<span id="${id}-short">… <button onclick="document.getElementById('${id}-short').style.display='none';document.getElementById('${id}-full').style.display='inline'" class="text-blue-400 hover:underline">Show more</button></span><span id="${id}-full" style="display:none">${escapeHtml(text.substring(500))}</span>` : ''}</pre>
       </div>`;
     }
 
@@ -112,7 +112,7 @@ function renderThreadEvents(threadId, events) {
       const lines = e.lines_added != null ? ` +${e.lines_added}` : '';
       return `<div class="py-1.5 px-3 my-0.5 flex items-center gap-2">
         <svg class="w-3.5 h-3.5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        <span class="text-xs text-green-400 truncate flex-1">${escapeHtml(e.path || '')}<span class="text-slate-500">${lines}</span></span>
+        <span class="text-xs text-green-400 truncate flex-1">${escapeHtml(e.path || '')}<span class="text-content-faint">${lines}</span></span>
         ${tsHtml}
       </div>`;
     }
@@ -137,16 +137,16 @@ function renderThreadEvents(threadId, events) {
     if (e.type === 'thinking') {
       const id = 'think-' + Math.random().toString(36).slice(2);
       return `<div class="py-1 px-3 my-0.5">
-        <button onclick="const el=document.getElementById('${id}');el.style.display=el.style.display==='none'?'block':'none'" class="text-xs text-slate-600 hover:text-slate-500 italic">Thinking…</button>
-        <div id="${id}" style="display:none" class="mt-1 text-xs text-slate-600 whitespace-pre-wrap">${escapeHtml(String(e.content || ''))}</div>
+        <button onclick="const el=document.getElementById('${id}');el.style.display=el.style.display==='none'?'block':'none'" class="text-xs text-content-faint hover:text-content-faint italic">Thinking…</button>
+        <div id="${id}" style="display:none" class="mt-1 text-xs text-content-faint whitespace-pre-wrap">${escapeHtml(String(e.content || ''))}</div>
         ${tsHtml}
       </div>`;
     }
 
     // fallback
     const text = e.content || e.message || e.path || e.type;
-    return `<div class="py-1.5 px-3 my-0.5 text-xs text-slate-500">
-      <span class="text-slate-600 mr-2">${escapeHtml(e.type)}</span>${escapeHtml(String(text).substring(0, 300))}${tsHtml}
+    return `<div class="py-1.5 px-3 my-0.5 text-xs text-content-faint">
+      <span class="text-content-faint mr-2">${escapeHtml(e.type)}</span>${escapeHtml(String(text).substring(0, 300))}${tsHtml}
     </div>`;
   });
 

@@ -60,10 +60,10 @@ function switchTab(tab) {
     if (!btn) return;
     if (t === tab) {
       btn.classList.add('bg-blue-600/20', 'text-blue-300');
-      btn.classList.remove('text-slate-400');
+      btn.classList.remove('text-content-muted');
     } else {
       btn.classList.remove('bg-blue-600/20', 'text-blue-300');
-      btn.classList.add('text-slate-400');
+      btn.classList.add('text-content-muted');
     }
   });
 }

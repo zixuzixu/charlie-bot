@@ -42,7 +42,7 @@ function showToast(msg, isError) {
   toast.id = 'backend-toast';
   toast.textContent = msg;
   toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-xs font-medium shadow-lg z-50 transition-opacity '
-    + (isError ? 'bg-red-700 text-red-100' : 'bg-slate-700 text-slate-100');
+    + (isError ? 'bg-red-700 text-red-100' : 'bg-surface-hover text-content');
   document.body.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
 }

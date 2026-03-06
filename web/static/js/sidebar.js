@@ -142,23 +142,23 @@ function renderSessionView(data) {
   const streamHtml = streamEl ? streamEl.outerHTML : '';
 
   const parts = messages.map(msg => {
-    const tsDiv = msg.timestamp ? '<div class="bubble-time text-[10px] text-slate-400/60 mt-1" data-ts="' + msg.timestamp + '"></div>' : '';
+    const tsDiv = msg.timestamp ? '<div class="bubble-time text-[10px] text-content-muted/60 mt-1" data-ts="' + msg.timestamp + '"></div>' : '';
     if (msg.role === 'user') {
       const voiceSpan = msg.is_voice ? '<span class="text-xs text-blue-200 block mb-1">&#127908; Voice</span>' : '';
       return '<div class="flex justify-end"><div class="max-w-[75%] overflow-hidden bg-blue-600 rounded-2xl rounded-br-md px-4 py-2.5 text-sm">'
         + voiceSpan + '<div class="whitespace-pre-wrap">' + escapeHtml(msg.content) + '</div>' + tsDiv + '</div></div>';
     }
     if (msg.role === 'assistant') {
-      return '<div class="flex justify-start"><div class="max-w-[90%] overflow-hidden bg-slate-700 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm">'
+      return '<div class="flex justify-start"><div class="max-w-[90%] overflow-hidden bg-surface-hover rounded-2xl rounded-bl-md px-4 py-2.5 text-sm">'
         + '<div class="prose-msg" data-md>' + escapeHtml(msg.content) + '</div>' + tsDiv + '</div></div>';
     }
     if (msg.role === 'system') {
       const titleAttr = msg.timestamp ? ' title="' + msg.timestamp + '"' : '';
-      return '<div class="flex justify-center"><div class="bg-slate-700/50 text-slate-400 text-xs px-3 py-1.5 rounded-full max-w-[85%] overflow-hidden truncate"' + titleAttr + '>'
+      return '<div class="flex justify-center"><div class="bg-surface-hover/50 text-content-muted text-xs px-3 py-1.5 rounded-full max-w-[85%] overflow-hidden truncate"' + titleAttr + '>'
         + escapeHtml(msg.content) + '</div></div>';
     }
     if (msg.role === 'task_delegated') {
-      return '<div class="flex justify-start"><div class="max-w-[90%] overflow-hidden bg-amber-900/30 border border-amber-700/30 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-slate-300">'
+      return '<div class="flex justify-start"><div class="max-w-[90%] overflow-hidden bg-amber-900/30 border border-amber-700/30 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-content-sec">'
         + '<div class="flex items-center gap-2 text-amber-400 text-xs font-semibold mb-2">'
         + '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>'
         + 'Delegated</div>'
@@ -167,13 +167,13 @@ function renderSessionView(data) {
     if (msg.role === 'worker_summary') {
       const escaped = escapeHtml(msg.full_content || '').replace(/"/g, '&quot;');
       const wsTsDiv = msg.timestamp ? '<div class="bubble-time text-[10px] text-emerald-400/50 mt-1" data-ts="' + msg.timestamp + '"></div>' : '';
-      return '<div class="flex justify-start"><div class="max-w-[90%] overflow-hidden bg-emerald-900/40 border border-emerald-700/30 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-slate-300 cursor-pointer"'
+      return '<div class="flex justify-start"><div class="max-w-[90%] overflow-hidden bg-emerald-900/40 border border-emerald-700/30 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-content-sec cursor-pointer"'
         + ' data-full="' + escaped + '"'
         + ' onclick="showTextModal(\'Worker Result\', this.dataset.full)">'
         + '<div class="prose-msg" data-md>' + escapeHtml(msg.content) + '</div>' + wsTsDiv + '</div></div>';
     }
     if (msg.role === 'plan') {
-      return '<div class="flex justify-start"><div class="max-w-[90%] overflow-hidden bg-slate-800 border border-blue-500/30 rounded-2xl px-4 py-3 text-sm">'
+      return '<div class="flex justify-start"><div class="max-w-[90%] overflow-hidden bg-surface-raised border border-blue-500/30 rounded-2xl px-4 py-3 text-sm">'
         + '<div class="flex items-center gap-2 text-blue-400 text-xs font-semibold mb-2">'
         + '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>'
         + 'Plan</div>'
@@ -182,13 +182,13 @@ function renderSessionView(data) {
     if (msg.role === 'separator') {
       const timeStr = msg.thinking_seconds != null ? ' &middot; ' + msg.thinking_seconds + 's' : '';
       return '<div class="flex items-center gap-3 py-2 px-4 separator-line group/sep">'
-        + '<div class="flex-1 border-t border-slate-600/40"></div>'
-        + '<span class="text-xs text-slate-500 whitespace-nowrap">response complete' + timeStr + '</span>'
+        + '<div class="flex-1 border-t border-edge-subtle/40"></div>'
+        + '<span class="text-xs text-content-faint whitespace-nowrap">response complete' + timeStr + '</span>'
         + '<button onclick="rewindSession(\'' + session.id + '\', ' + msg.event_index + ')"'
-        + ' class="opacity-0 group-hover/sep:opacity-100 p-0.5 text-slate-500 hover:text-blue-400 transition-opacity" title="Rewind to here">'
+        + ' class="opacity-0 group-hover/sep:opacity-100 p-0.5 text-content-faint hover:text-blue-400 transition-opacity" title="Rewind to here">'
         + '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/></svg>'
         + '</button>'
-        + '<div class="flex-1 border-t border-slate-600/40"></div></div>';
+        + '<div class="flex-1 border-t border-edge-subtle/40"></div></div>';
     }
     return '';
   });
@@ -219,7 +219,7 @@ function renderSessionView(data) {
       if (badge) { badge.textContent = data.threads.length; }
       else {
         const s = document.createElement('span');
-        s.className = 'ml-1 text-xs bg-slate-600 px-1.5 py-0.5 rounded-full';
+        s.className = 'ml-1 text-xs bg-surface-hover px-1.5 py-0.5 rounded-full';
         s.textContent = data.threads.length;
         btn.appendChild(s);
       }
@@ -260,13 +260,13 @@ function renderWorkersTab(threads, sessionId) {
   if (!container) return;
 
   if (!threads || !threads.length) {
-    container.innerHTML = '<div id="no-workers-placeholder" class="flex items-center justify-center h-full text-slate-500 text-sm">No worker threads</div>';
+    container.innerHTML = '<div id="no-workers-placeholder" class="flex items-center justify-center h-full text-content-faint text-sm">No worker threads</div>';
     return;
   }
 
   const cards = threads.map(t => {
-    const statusColors = {running: 'bg-blue-500', completed: 'bg-green-500', failed: 'bg-red-500', cancelled: 'bg-slate-500', idle: 'bg-slate-500'};
-    const dotColor = statusColors[t.status] || 'bg-slate-500';
+    const statusColors = {running: 'bg-blue-500', completed: 'bg-green-500', failed: 'bg-red-500', cancelled: 'bg-content-faint', idle: 'bg-content-faint'};
+    const dotColor = statusColors[t.status] || 'bg-content-faint';
     const pulse = t.status === 'running' ? ' animate-pulse' : '';
     const created = new Date(t.created_at);
     const mm = String(created.getMonth() + 1).padStart(2, '0');
@@ -280,20 +280,20 @@ function renderWorkersTab(threads, sessionId) {
       duration = ' &middot; ' + Math.floor(secs / 60) + 'm' + (secs % 60) + 's';
     }
     const cancelBtn = t.status === 'running'
-      ? '<button id="cancel-btn-' + t.id + '" onclick="event.stopPropagation(); cancelThread(\'' + t.id + '\', \'' + sessionId + '\')" class="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-red-400 transition-colors" title="Cancel"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>'
+      ? '<button id="cancel-btn-' + t.id + '" onclick="event.stopPropagation(); cancelThread(\'' + t.id + '\', \'' + sessionId + '\')" class="p-1 rounded hover:bg-surface-hover text-content-faint hover:text-red-400 transition-colors" title="Cancel"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>'
       : '';
-    return '<div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">'
-      + '<div class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-750" onclick="toggleThreadDetail(\'' + t.id + '\', \'' + sessionId + '\')">'
+    return '<div class="bg-surface-raised rounded-xl border border-edge overflow-hidden">'
+      + '<div class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-surface-hover" onclick="toggleThreadDetail(\'' + t.id + '\', \'' + sessionId + '\')">'
       + '<span id="thread-dot-' + t.id + '" class="w-2 h-2 rounded-full flex-shrink-0 ' + dotColor + pulse + '"></span>'
       + '<div class="flex-1 min-w-0">'
       + '<p class="text-sm truncate cursor-pointer hover:text-blue-400 transition-colors" title="Click to view full description" onclick="event.stopPropagation(); showTextModal(\'Worker Description\', this.dataset.full)" data-full="' + escapeHtml(t.description || '').replace(/"/g, '&quot;') + '">' + escapeHtml(t.description || '') + '</p>'
-      + '<p id="thread-status-' + t.id + '" class="text-xs text-slate-500">' + (t.status || 'idle') + ' &middot; ' + timeStr + duration + (t.backend ? ' &middot; ' + (BACKEND_OPTIONS[t.backend] || t.backend) : '') + '</p>'
+      + '<p id="thread-status-' + t.id + '" class="text-xs text-content-faint">' + (t.status || 'idle') + ' &middot; ' + timeStr + duration + (t.backend ? ' &middot; ' + (BACKEND_OPTIONS[t.backend] || t.backend) : '') + '</p>'
       + '</div>'
       + cancelBtn
-      + '<svg class="w-4 h-4 text-slate-500 transition-transform thread-chevron" id="chevron-' + t.id + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>'
+      + '<svg class="w-4 h-4 text-content-faint transition-transform thread-chevron" id="chevron-' + t.id + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>'
       + '</div>'
-      + '<div id="thread-detail-' + t.id + '" class="hidden border-t border-slate-700">'
-      + '<div id="thread-events-' + t.id + '" class="p-4 max-h-96 overflow-y-auto"><p class="text-xs text-slate-500">Loading events...</p></div>'
+      + '<div id="thread-detail-' + t.id + '" class="hidden border-t border-edge">'
+      + '<div id="thread-events-' + t.id + '" class="p-4 max-h-96 overflow-y-auto"><p class="text-xs text-content-faint">Loading events...</p></div>'
       + '</div></div>';
   });
 
@@ -304,7 +304,7 @@ function updateSidebarHighlight(newSessionId) {
   document.querySelectorAll('[id^="session-"]').forEach(el => {
     if (!el.id.startsWith('session-')) return;
     el.classList.remove('bg-blue-600/20', 'text-blue-300');
-    el.classList.add('hover:bg-slate-700/50', 'text-slate-300');
+    el.classList.add('hover:bg-surface-hover/50', 'text-content-sec');
     el.querySelectorAll('.group-hover\\:opacity-100').forEach(btn => {
       if (btn.classList.contains('star-btn') && btn.classList.contains('text-yellow-400')) return;
       btn.classList.remove('!opacity-100');
@@ -313,7 +313,7 @@ function updateSidebarHighlight(newSessionId) {
   const active = document.getElementById('session-' + newSessionId);
   if (active) {
     active.classList.add('bg-blue-600/20', 'text-blue-300');
-    active.classList.remove('hover:bg-slate-700/50', 'text-slate-300');
+    active.classList.remove('hover:bg-surface-hover/50', 'text-content-sec');
     active.querySelectorAll('.group-hover\\:opacity-100').forEach(btn => {
       btn.classList.add('!opacity-100');
     });
@@ -362,7 +362,7 @@ function updateWorkersTabBadge() {
   if (count > 0) {
     if (!badge) {
       badge = document.createElement('span');
-      badge.className = 'ml-1 text-xs bg-slate-600 px-1.5 py-0.5 rounded-full';
+      badge.className = 'ml-1 text-xs bg-surface-hover px-1.5 py-0.5 rounded-full';
       btn.appendChild(badge);
     }
     badge.textContent = count;
@@ -376,14 +376,14 @@ function updateWorkersTabBadge() {
 // ---------------------------------------------------------------------------
 const STATUS_DOT_COLORS = {
   running: 'bg-blue-500', completed: 'bg-green-500',
-  failed: 'bg-red-500', cancelled: 'bg-slate-500', idle: 'bg-slate-500',
+  failed: 'bg-red-500', cancelled: 'bg-content-faint', idle: 'bg-content-faint',
 };
 
 function updateWorkerStatus(threadId, status) {
   const dot = document.getElementById('thread-dot-' + threadId);
   const text = document.getElementById('thread-status-' + threadId);
   if (!dot || !text) return;
-  dot.className = 'w-2 h-2 rounded-full flex-shrink-0 ' + (STATUS_DOT_COLORS[status] || 'bg-slate-500');
+  dot.className = 'w-2 h-2 rounded-full flex-shrink-0 ' + (STATUS_DOT_COLORS[status] || 'bg-content-faint');
   // preserve timestamp portion if present
   const cur = text.textContent;
   const dotIdx = cur.indexOf(' · ');
@@ -401,7 +401,7 @@ function addWorkerCard(threadId, description, createdAt, backend) {
   // Don't add duplicate
   if (document.getElementById('thread-dot-' + threadId)) return;
   const card = document.createElement('div');
-  card.className = 'bg-slate-800 rounded-xl border border-slate-700 overflow-hidden';
+  card.className = 'bg-surface-raised rounded-xl border border-edge overflow-hidden';
   const nowStr = (() => {
     const d = createdAt ? new Date(createdAt) : new Date();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -411,27 +411,27 @@ function addWorkerCard(threadId, description, createdAt, backend) {
     return `${mm}/${dd} ${hh}:${mi}`;
   })();
   card.innerHTML = `
-    <div class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-750"
+    <div class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-surface-hover"
          onclick="toggleThreadDetail('${threadId}', '${SESSION_ID}')">
       <span id="thread-dot-${threadId}" class="w-2 h-2 rounded-full flex-shrink-0 bg-blue-500 animate-pulse"></span>
       <div class="flex-1 min-w-0">
         <p class="text-sm truncate cursor-pointer hover:text-blue-400 transition-colors" title="Click to view full description" onclick="event.stopPropagation(); showTextModal('Worker Description', this.dataset.full)" data-full="${escapeHtml(description)}">${escapeHtml(description)}</p>
-        <p id="thread-status-${threadId}" class="text-xs text-slate-500">running &middot; ${nowStr}${backend ? ' &middot; ' + (BACKEND_OPTIONS[backend] || backend) : ''}</p>
+        <p id="thread-status-${threadId}" class="text-xs text-content-faint">running &middot; ${nowStr}${backend ? ' &middot; ' + (BACKEND_OPTIONS[backend] || backend) : ''}</p>
       </div>
       <button id="cancel-btn-${threadId}" onclick="event.stopPropagation(); cancelThread('${threadId}', '${SESSION_ID}')"
-              class="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-red-400 transition-colors" title="Cancel">
+              class="p-1 rounded hover:bg-surface-hover text-content-faint hover:text-red-400 transition-colors" title="Cancel">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
-      <svg class="w-4 h-4 text-slate-500 transition-transform thread-chevron" id="chevron-${threadId}"
+      <svg class="w-4 h-4 text-content-faint transition-transform thread-chevron" id="chevron-${threadId}"
            fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
       </svg>
     </div>
-    <div id="thread-detail-${threadId}" class="hidden border-t border-slate-700">
+    <div id="thread-detail-${threadId}" class="hidden border-t border-edge">
       <div id="thread-events-${threadId}" class="p-4 max-h-96 overflow-y-auto">
-        <p class="text-xs text-slate-500">Loading events...</p>
+        <p class="text-xs text-content-faint">Loading events...</p>
       </div>
     </div>`;
   container.prepend(card);
@@ -563,12 +563,12 @@ function switchSidebarFilter(filter) {
   // Update pill styles
   document.querySelectorAll('.filter-pill').forEach(btn => {
     btn.classList.remove('bg-blue-600/20', 'text-blue-300');
-    btn.classList.add('text-slate-400');
+    btn.classList.add('text-content-muted');
   });
   const active = document.getElementById('filter-' + filter);
   if (active) {
     active.classList.add('bg-blue-600/20', 'text-blue-300');
-    active.classList.remove('text-slate-400');
+    active.classList.remove('text-content-muted');
   }
   // Fetch sessions for this filter
   const urls = {
@@ -645,14 +645,14 @@ async function toggleSessionStar(id, currentlyStarred) {
 // ---------------------------------------------------------------------------
 function renderScheduledSessionItem(s) {
   const isActive = SESSION_ID === s.id;
-  const activeClass = isActive ? 'bg-blue-600/20 text-blue-300' : 'hover:bg-slate-700/50 text-slate-300';
+  const activeClass = isActive ? 'bg-blue-600/20 text-blue-300' : 'hover:bg-surface-hover/50 text-content-sec';
   const starFill = s.starred ? 'currentColor' : 'none';
   const starClass = s.starred ? 'text-yellow-400 !opacity-100' : 'hover:text-yellow-400';
   const activeBtnClass = isActive ? '!opacity-100' : '';
   const starSvg = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>`;
   const gearBtn = s.scheduled_task ? `
     <button onclick="event.preventDefault(); event.stopPropagation(); openCronEditor('${escapeHtml(s.scheduled_task)}')"
-            class="opacity-0 group-hover:opacity-100 p-0.5 text-slate-500 hover:text-slate-300 transition-opacity flex-shrink-0 ${activeBtnClass}" title="Edit task config">
+            class="opacity-0 group-hover:opacity-100 p-0.5 text-content-faint hover:text-content-sec transition-opacity flex-shrink-0 ${activeBtnClass}" title="Edit task config">
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
     </button>` : '';
   const actions = `
@@ -676,10 +676,10 @@ function renderScheduledSessionItem(s) {
      id="session-${s.id}">
     <svg id="spinner-${s.id}" class="w-4 h-4 animate-spin text-yellow-400 flex-shrink-0 ${s.has_running_tasks ? '' : 'hidden'}" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
     <span id="unread-${s.id}" data-has-unread="${s.has_unread ? 1 : 0}" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse-dot flex-shrink-0 ${s.has_unread && !s.has_running_tasks ? '' : 'hidden'}"></span>
-    <svg class="w-3 h-3 flex-shrink-0 ${s.schedule_enabled === false ? 'text-slate-500' : 'text-blue-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Scheduled: ${escapeHtml(s.scheduled_task || '')}"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/></svg>
+    <svg class="w-3 h-3 flex-shrink-0 ${s.schedule_enabled === false ? 'text-content-faint' : 'text-blue-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Scheduled: ${escapeHtml(s.scheduled_task || '')}"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/></svg>
     <span class="flex-1 min-w-0">
       <span class="truncate block session-name">${escapeHtml(s.name)}</span>
-      ${s.schedule_cron ? `<span class="block text-xs text-slate-500">${escapeHtml(s.schedule_cron)} (${escapeHtml(s.schedule_timezone || '')})</span><span class="block text-xs text-slate-500">${s.schedule_enabled === false ? 'Disabled' : 'Next: ' + formatNextRun(s.schedule_next_run)}</span>` : ''}
+      ${s.schedule_cron ? `<span class="block text-xs text-content-faint">${escapeHtml(s.schedule_cron)} (${escapeHtml(s.schedule_timezone || '')})</span><span class="block text-xs text-content-faint">${s.schedule_enabled === false ? 'Disabled' : 'Next: ' + formatNextRun(s.schedule_next_run)}</span>` : ''}
       ${s.last_run_status ? `<span class="block text-xs ${s.last_run_status === 'success' ? 'text-green-400' : s.last_run_status === 'running' ? 'text-yellow-400' : (s.schedule_allow_failure ? 'text-amber-400' : 'text-red-400')}">Last: ${escapeHtml(s.last_run_status)}${s.last_scheduled_run ? ', ' + formatLastRun(s.last_scheduled_run) : ''}${s.last_run_status === 'failed' && s.schedule_allow_failure ? ' (review needed)' : ''}</span>` : ''}
     </span>
     ${actions}
@@ -689,7 +689,7 @@ function renderScheduledSessionItem(s) {
 function renderGroupedScheduledList(sessions) {
   const nav = document.getElementById('session-list');
   if (!sessions.length) {
-    nav.innerHTML = '<p class="text-slate-500 text-sm px-3 py-2">No scheduled sessions</p>';
+    nav.innerHTML = '<p class="text-content-faint text-sm px-3 py-2">No scheduled sessions</p>';
     return;
   }
   // Group by project
@@ -720,13 +720,13 @@ function renderGroupedScheduledList(sessions) {
     const safeKey = escapeHtml(key);
 
     html += `<div class="cron-group" data-group-key="${safeKey}">
-      <div class="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-slate-700/30 rounded-lg select-none"
+      <div class="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-surface-hover/30 rounded-lg select-none"
            onclick="toggleCronGroup('${safeKey}')">
-        <svg class="w-3 h-3 text-slate-500 transition-transform cron-group-chevron ${chevronClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-3 h-3 text-content-faint transition-transform cron-group-chevron ${chevronClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">${escapeHtml(label)}</span>
-        <span class="text-xs text-slate-500 ml-auto">${enabledCount}/${totalCount} enabled</span>
+        <span class="text-xs font-semibold text-content-muted uppercase tracking-wider">${escapeHtml(label)}</span>
+        <span class="text-xs text-content-faint ml-auto">${enabledCount}/${totalCount} enabled</span>
       </div>
       <div class="cron-group-items ${isCollapsed ? 'hidden' : ''}" data-group-items="${safeKey}">
         ${groupSessions.map(s => renderScheduledSessionItem(s)).join('')}
@@ -770,13 +770,13 @@ function renderSessionList(sessions, filter) {
       scheduled: 'No scheduled sessions',
       search: 'No matching sessions',
     };
-    nav.innerHTML = `<p class="text-slate-500 text-sm px-3 py-2">${labels[filter]}</p>`;
+    nav.innerHTML = `<p class="text-content-faint text-sm px-3 py-2">${labels[filter]}</p>`;
     return;
   }
   const starSvg = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>`;
   nav.innerHTML = sessions.map(s => {
     const isActive = SESSION_ID === s.id;
-    const activeClass = isActive ? 'bg-blue-600/20 text-blue-300' : 'hover:bg-slate-700/50 text-slate-300';
+    const activeClass = isActive ? 'bg-blue-600/20 text-blue-300' : 'hover:bg-surface-hover/50 text-content-sec';
     const starFill = s.starred ? 'currentColor' : 'none';
     const starClass = s.starred ? 'text-yellow-400 !opacity-100' : 'hover:text-yellow-400';
     const activeBtnClass = isActive ? '!opacity-100' : '';
@@ -811,7 +811,7 @@ function renderSessionList(sessions, filter) {
     } else {
       const gearBtn = (filter === 'scheduled' && s.scheduled_task) ? `
         <button onclick="event.preventDefault(); event.stopPropagation(); openCronEditor('${escapeHtml(s.scheduled_task)}')"
-                class="opacity-0 group-hover:opacity-100 p-0.5 text-slate-500 hover:text-slate-300 transition-opacity flex-shrink-0 ${activeBtnClass}" title="Edit task config">
+                class="opacity-0 group-hover:opacity-100 p-0.5 text-content-faint hover:text-content-sec transition-opacity flex-shrink-0 ${activeBtnClass}" title="Edit task config">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>` : '';
       actions = `
@@ -840,10 +840,10 @@ function renderSessionList(sessions, filter) {
        id="session-${s.id}">
       <svg id="spinner-${s.id}" class="w-4 h-4 animate-spin text-yellow-400 flex-shrink-0 ${s.has_running_tasks ? '' : 'hidden'}" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
       <span id="unread-${s.id}" data-has-unread="${s.has_unread ? 1 : 0}" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse-dot flex-shrink-0 ${s.has_unread && !s.has_running_tasks ? '' : 'hidden'}"></span>
-      ${s.scheduled_task ? `<svg class="w-3 h-3 flex-shrink-0 ${s.schedule_enabled === false ? 'text-slate-500' : 'text-blue-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Scheduled: ${escapeHtml(s.scheduled_task)}"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/></svg>` : ''}
+      ${s.scheduled_task ? `<svg class="w-3 h-3 flex-shrink-0 ${s.schedule_enabled === false ? 'text-content-faint' : 'text-blue-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Scheduled: ${escapeHtml(s.scheduled_task)}"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/></svg>` : ''}
       <span class="flex-1 min-w-0">
         <span class="truncate block session-name">${escapeHtml(s.name)}</span>
-        ${filter === 'scheduled' && s.schedule_cron ? `<span class="block text-xs text-slate-500">${escapeHtml(s.schedule_cron)} (${escapeHtml(s.schedule_timezone || '')})</span><span class="block text-xs text-slate-500">${s.schedule_enabled === false ? 'Disabled' : 'Next: ' + formatNextRun(s.schedule_next_run)}</span>` : `<span class="block text-xs text-slate-500 session-time" data-time="${timeIso}">${timeStr}</span>`}
+        ${filter === 'scheduled' && s.schedule_cron ? `<span class="block text-xs text-content-faint">${escapeHtml(s.schedule_cron)} (${escapeHtml(s.schedule_timezone || '')})</span><span class="block text-xs text-content-faint">${s.schedule_enabled === false ? 'Disabled' : 'Next: ' + formatNextRun(s.schedule_next_run)}</span>` : `<span class="block text-xs text-content-faint session-time" data-time="${timeIso}">${timeStr}</span>`}
       </span>
       ${actions}
     </a>`;

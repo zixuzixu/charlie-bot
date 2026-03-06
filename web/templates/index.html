@@ -4,17 +4,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CharlieBot</title>
+  <script>
+    // Prevent FOUC — apply theme before CSS loads
+    (function() {
+      var t = localStorage.getItem('charliebot-theme');
+      if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
-      theme: { extend: { colors: { slate: { 850: '#172033' } } } }
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              base: 'rgb(var(--s-base) / <alpha-value>)',
+              sidebar: 'rgb(var(--s-sidebar) / <alpha-value>)',
+              raised: 'rgb(var(--s-raised) / <alpha-value>)',
+              input: 'rgb(var(--s-input) / <alpha-value>)',
+              hover: 'rgb(var(--s-hover) / <alpha-value>)',
+            },
+            edge: {
+              DEFAULT: 'rgb(var(--b-primary) / <alpha-value>)',
+              subtle: 'rgb(var(--b-subtle) / <alpha-value>)',
+            },
+            content: {
+              DEFAULT: 'rgb(var(--t-primary) / <alpha-value>)',
+              sec: 'rgb(var(--t-secondary) / <alpha-value>)',
+              muted: 'rgb(var(--t-muted) / <alpha-value>)',
+              faint: 'rgb(var(--t-faint) / <alpha-value>)',
+            },
+          },
+        },
+      },
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <link id="hljs-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/diff/dist/diff.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
@@ -38,26 +69,29 @@
     };
   </script>
 </head>
-<body class="dark bg-slate-900 text-slate-100 h-dvh overflow-hidden">
+<body class="bg-surface-base text-content h-dvh overflow-hidden">
   <div class="flex h-dvh">
 
     <!-- ==================== SIDEBAR ==================== -->
-    <aside id="sidebar" class="flex-shrink-0 bg-slate-850 border-r border-slate-700 flex flex-col" style="width: 320px">
+    <aside id="sidebar" class="flex-shrink-0 bg-surface-sidebar border-r border-edge flex flex-col" style="width: 320px">
       <!-- Logo -->
-      <div class="p-4 border-b border-slate-700">
+      <div class="p-4 border-b border-edge flex items-center justify-between">
         <h1 class="text-lg font-bold text-blue-400">CharlieBot</h1>
+        <button id="theme-toggle" onclick="toggleTheme()" class="p-1.5 rounded-lg hover:bg-surface-hover transition-colors text-content-muted" title="Toggle theme">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
       </div>
 
       <!-- New session -->
-      <div class="p-3 border-b border-slate-700">
+      <div class="p-3 border-b border-edge">
         <div class="flex gap-2">
-          <button onclick="createSession()" class="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-sm font-medium transition-colors min-w-0">
+          <button onclick="createSession()" class="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors min-w-0">
             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             <span class="truncate">New Session</span>
           </button>
           {% if backend_options %}
           <select id="new-session-backend"
-                  class="text-xs bg-slate-800 border border-slate-600 rounded-lg px-2 py-2 text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer hover:border-slate-500 transition-colors"
+                  class="text-xs bg-surface-input border border-edge-subtle rounded-lg px-2 py-2 text-content-sec focus:outline-none focus:border-blue-500 cursor-pointer hover:border-edge transition-colors"
                   style="max-width: 110px;"
                   title="Select backend for new session">
             {% for opt in backend_options %}
@@ -69,19 +103,19 @@
       </div>
 
       <!-- Sidebar filter tabs -->
-      <div class="px-3 py-2 border-b border-slate-700 flex gap-1 items-center">
+      <div class="px-3 py-2 border-b border-edge flex gap-1 items-center">
         <button onclick="switchSidebarFilter('all')" id="filter-all" class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors bg-blue-600/20 text-blue-300">All</button>
-        <button onclick="switchSidebarFilter('starred')" id="filter-starred" class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors text-slate-400 hover:text-slate-200">Starred</button>
-        <button onclick="switchSidebarFilter('archived')" id="filter-archived" class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors text-slate-400 hover:text-slate-200">Archived</button>
-        <button onclick="switchSidebarFilter('waiting')" id="filter-waiting" class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors text-slate-400 hover:text-slate-200">Waiting</button>
-        <button onclick="switchSidebarFilter('scheduled')" id="filter-scheduled" class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors text-slate-400 hover:text-slate-200">Scheduled</button>
-        <button onclick="openCronAdder()" id="cron-add-btn" class="ml-auto px-2 py-0.5 text-sm rounded font-medium text-slate-400 hover:text-slate-200 hidden" title="New scheduled task">+</button>
+        <button onclick="switchSidebarFilter('starred')" id="filter-starred" class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors text-content-muted hover:text-content-sec">Starred</button>
+        <button onclick="switchSidebarFilter('archived')" id="filter-archived" class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors text-content-muted hover:text-content-sec">Archived</button>
+        <button onclick="switchSidebarFilter('waiting')" id="filter-waiting" class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors text-content-muted hover:text-content-sec">Waiting</button>
+        <button onclick="switchSidebarFilter('scheduled')" id="filter-scheduled" class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors text-content-muted hover:text-content-sec">Scheduled</button>
+        <button onclick="openCronAdder()" id="cron-add-btn" class="ml-auto px-2 py-0.5 text-sm rounded font-medium text-content-muted hover:text-content-sec hidden" title="New scheduled task">+</button>
       </div>
 
       <!-- Search -->
-      <div class="px-3 py-2 border-b border-slate-700">
+      <div class="px-3 py-2 border-b border-edge">
         <input id="sidebar-search" type="text" placeholder="Search sessions..."
-               class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+               class="w-full bg-surface-input border border-edge-subtle rounded-lg px-3 py-1.5 text-sm text-content-sec placeholder-content-faint focus:outline-none focus:border-blue-500"
                oninput="handleSidebarSearch(this.value)">
       </div>
 
@@ -90,7 +124,7 @@
         {% for s in sessions %}
         <a href="/?session={{ s.id }}"
            class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors
-                  {% if active_session and active_session.id == s.id %}bg-blue-600/20 text-blue-300{% else %}hover:bg-slate-700/50 text-slate-300{% endif %}"
+                  {% if active_session and active_session.id == s.id %}bg-blue-600/20 text-blue-300{% else %}hover:bg-surface-hover/50 text-content-sec{% endif %}"
            ondblclick="startRename(event, '{{ s.id }}', '{{ s.name|e }}')"
            onclick="event.preventDefault(); switchSession('{{ s.id }}')"
            id="session-{{ s.id }}">
@@ -99,7 +133,7 @@
           {% if s.scheduled_task %}<svg class="w-3 h-3 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Scheduled: {{ s.scheduled_task }}"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/></svg>{% endif %}
           <span class="flex-1 min-w-0">
             <span class="truncate block session-name">{{ s.name }}</span>
-            <span class="block text-xs text-slate-500 session-time" data-time="{{ s.updated_at.isoformat() }}">{{ s.updated_at.strftime('%b %d, %H:%M') }}</span>
+            <span class="block text-xs text-content-faint session-time" data-time="{{ s.updated_at.isoformat() }}">{{ s.updated_at.strftime('%b %d, %H:%M') }}</span>
           </span>
           <button onclick="event.preventDefault(); event.stopPropagation(); toggleSessionStar('{{ s.id }}', {{ 'true' if s.starred else 'false' }})"
                   class="opacity-0 group-hover:opacity-100 p-1 transition-opacity flex-shrink-0 star-btn {% if s.starred %}text-yellow-400 !opacity-100{% else %}hover:text-yellow-400{% endif %}{% if active_session and active_session.id == s.id %} !opacity-100{% endif %}" title="Star" id="star-{{ s.id }}">
@@ -120,7 +154,7 @@
         </a>
         {% endfor %}
         {% if not sessions %}
-        <p class="text-slate-500 text-sm px-3 py-2">No sessions yet</p>
+        <p class="text-content-faint text-sm px-3 py-2">No sessions yet</p>
         {% endif %}
       </nav>
     </aside>
@@ -132,9 +166,9 @@
       {% if active_session %}
 
       <!-- Tab bar -->
-      <header class="flex items-center border-b border-slate-700 bg-slate-800/50 px-4">
-        <button class="hamburger-btn p-2 -ml-2 mr-1 rounded-lg hover:bg-slate-700 transition-colors" onclick="toggleMobileSidebar()" title="Menu">
-          <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <header class="flex items-center border-b border-edge bg-surface-raised/50 px-4">
+        <button class="hamburger-btn p-2 -ml-2 mr-1 rounded-lg hover:bg-surface-hover transition-colors" onclick="toggleMobileSidebar()" title="Menu">
+          <svg class="w-5 h-5 text-content-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <div class="flex-1 min-w-0 py-3">
           <h2 class="text-sm font-semibold truncate cursor-pointer hover:text-blue-300 transition-colors"
@@ -143,11 +177,11 @@
               id="header-session-name">{{ active_session.name }}</h2>
         </div>
         <!-- Backend badge -->
-        <span id="backend-badge" class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300 border border-slate-600 whitespace-nowrap" title="Session backend">{{ active_backend_label or active_backend }}</span>
+        <span id="backend-badge" class="text-xs px-2 py-0.5 rounded bg-surface-hover text-content-sec border border-edge-subtle whitespace-nowrap" title="Session backend">{{ active_backend_label or active_backend }}</span>
         <!-- Context usage indicator -->
         <div id="usage-indicator" class="flex items-center gap-2 ml-3 mr-2 {% if not session_usage %}hidden{% endif %}">
           <div class="flex items-center gap-1.5" title="Context window usage">
-            <div class="w-20 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+            <div class="w-20 h-1.5 bg-surface-hover rounded-full overflow-hidden">
               <div id="usage-bar" class="h-full rounded-full transition-all duration-300
                 {% if session_usage %}
                   {% set pct = (session_usage.context_tokens / session_usage.context_limit * 100) if session_usage.context_limit else 0 %}
@@ -155,24 +189,24 @@
                 {% else %}bg-blue-500{% endif %}"
                 style="width: {% if session_usage %}{{ (session_usage.context_tokens / session_usage.context_limit * 100)|round(1) }}%{% else %}0%{% endif %}"></div>
             </div>
-            <span id="usage-text" class="text-xs text-slate-400 whitespace-nowrap">{% if session_usage %}{{ '%dk' % (session_usage.context_tokens // 1000) }} / {{ '%dk' % (session_usage.context_limit // 1000) }}{% endif %}</span>
+            <span id="usage-text" class="text-xs text-content-muted whitespace-nowrap">{% if session_usage %}{{ '%dk' % (session_usage.context_tokens // 1000) }} / {{ '%dk' % (session_usage.context_limit // 1000) }}{% endif %}</span>
           </div>
-          <span id="usage-cost" class="text-xs text-slate-500 whitespace-nowrap">{% if session_usage %}${{ '%.2f' % session_usage.total_cost_usd }}{% endif %}</span>
+          <span id="usage-cost" class="text-xs text-content-faint whitespace-nowrap">{% if session_usage %}${{ '%.2f' % session_usage.total_cost_usd }}{% endif %}</span>
         </div>
         <a href="/sessions/{{ active_session.id }}/events"
-           class="text-slate-500 hover:text-slate-300 transition-colors ml-2 mr-2" title="View JSONL events">
+           class="text-content-faint hover:text-content-sec transition-colors ml-2 mr-2" title="View JSONL events">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z" />
           </svg>
         </a>
         <div id="tab-buttons" class="flex gap-1">
-          <button onclick="switchTab('chat-tex')" id="btn-chat-tex" class="tab-btn px-3 py-2 text-sm rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-200">Chat w/ TeX</button>
-          <button onclick="switchTab('chat-backlog')" id="btn-chat-backlog" class="tab-btn px-3 py-2 text-sm rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-200">Backlog</button>
+          <button onclick="switchTab('chat-tex')" id="btn-chat-tex" class="tab-btn px-3 py-2 text-sm rounded-lg font-medium transition-colors text-content-muted hover:text-content-sec">Chat w/ TeX</button>
+          <button onclick="switchTab('chat-backlog')" id="btn-chat-backlog" class="tab-btn px-3 py-2 text-sm rounded-lg font-medium transition-colors text-content-muted hover:text-content-sec">Backlog</button>
           <button onclick="switchTab('chat')" id="btn-chat" class="tab-btn px-3 py-2 text-sm rounded-lg font-medium transition-colors bg-blue-600/20 text-blue-300">Chat</button>
-          <button onclick="switchTab('workers')" id="btn-workers" class="tab-btn px-3 py-2 text-sm rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-200">
+          <button onclick="switchTab('workers')" id="btn-workers" class="tab-btn px-3 py-2 text-sm rounded-lg font-medium transition-colors text-content-muted hover:text-content-sec">
             Workers
-            {% if threads %}<span class="ml-1 text-xs bg-slate-600 px-1.5 py-0.5 rounded-full">{{ threads|length }}</span>{% endif %}
+            {% if threads %}<span class="ml-1 text-xs bg-surface-hover px-1.5 py-0.5 rounded-full">{{ threads|length }}</span>{% endif %}
           </button>
         </div>
       </header>
@@ -186,37 +220,37 @@
           {% for msg in messages %}
           {% if msg.role == 'user' %}
           <div class="flex justify-end">
-            <div class="max-w-[75%] overflow-hidden bg-blue-600 rounded-2xl rounded-br-md px-4 py-2.5 text-sm">
+            <div class="max-w-[75%] overflow-hidden bg-blue-600 text-white rounded-2xl rounded-br-md px-4 py-2.5 text-sm">
               {% if msg.is_voice %}<span class="text-xs text-blue-200 block mb-1">&#127908; Voice</span>{% endif %}
               <div class="whitespace-pre-wrap">{{ msg.content }}</div>
-              {% if msg.timestamp %}<div class="bubble-time text-[10px] text-slate-400/60 mt-1" data-ts="{{ msg.timestamp }}"></div>{% endif %}
+              {% if msg.timestamp %}<div class="bubble-time text-[10px] text-content-muted/60 mt-1" data-ts="{{ msg.timestamp }}"></div>{% endif %}
             </div>
           </div>
           {% elif msg.role == 'assistant' %}
           <div class="flex justify-start">
-            <div class="max-w-[90%] overflow-hidden bg-slate-700 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm">
+            <div class="max-w-[90%] overflow-hidden bg-surface-hover rounded-2xl rounded-bl-md px-4 py-2.5 text-sm">
               <div class="prose-msg" data-md>{{ msg.content }}</div>
-              {% if msg.timestamp %}<div class="bubble-time text-[10px] text-slate-400/60 mt-1" data-ts="{{ msg.timestamp }}"></div>{% endif %}
+              {% if msg.timestamp %}<div class="bubble-time text-[10px] text-content-muted/60 mt-1" data-ts="{{ msg.timestamp }}"></div>{% endif %}
             </div>
           </div>
           {% elif msg.role == 'system' %}
           <div class="flex justify-center">
-            <div class="bg-slate-700/50 text-slate-400 text-xs px-3 py-1.5 rounded-full max-w-[85%] overflow-hidden truncate"{% if msg.timestamp %} title="{{ msg.timestamp }}"{% endif %}>{{ msg.content }}</div>
+            <div class="bg-surface-hover/50 text-content-muted text-xs px-3 py-1.5 rounded-full max-w-[85%] overflow-hidden truncate"{% if msg.timestamp %} title="{{ msg.timestamp }}"{% endif %}>{{ msg.content }}</div>
           </div>
           {% elif msg.role == 'task_delegated' %}
           <div class="flex justify-start">
-            <div class="max-w-[90%] overflow-hidden bg-amber-900/30 border border-amber-700/30 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-slate-300">
+            <div class="max-w-[90%] overflow-hidden bg-amber-900/30 border border-amber-700/30 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-content-sec">
               <div class="flex items-center gap-2 text-amber-400 text-xs font-semibold mb-2">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
                 Delegated
               </div>
               <div class="whitespace-pre-wrap">{{ msg.content }}</div>
-              {% if msg.timestamp %}<div class="bubble-time text-[10px] text-slate-400/60 mt-1" data-ts="{{ msg.timestamp }}"></div>{% endif %}
+              {% if msg.timestamp %}<div class="bubble-time text-[10px] text-content-muted/60 mt-1" data-ts="{{ msg.timestamp }}"></div>{% endif %}
             </div>
           </div>
           {% elif msg.role == 'worker_summary' %}
           <div class="flex justify-start">
-            <div class="max-w-[90%] overflow-hidden bg-emerald-900/40 border border-emerald-700/30 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-slate-300 cursor-pointer"
+            <div class="max-w-[90%] overflow-hidden bg-emerald-900/40 border border-emerald-700/30 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-content-sec cursor-pointer"
                  data-full="{{ msg.full_content | e }}"
                  onclick="showTextModal('Worker Result', this.dataset.full)">
               <div class="prose-msg" data-md>{{ msg.content }}</div>
@@ -225,74 +259,74 @@
           </div>
           {% elif msg.role == 'plan' %}
           <div class="flex justify-start">
-            <div class="max-w-[90%] overflow-hidden bg-slate-800 border border-blue-500/30 rounded-2xl px-4 py-3 text-sm prose-msg">
+            <div class="max-w-[90%] overflow-hidden bg-surface-raised border border-blue-500/30 rounded-2xl px-4 py-3 text-sm prose-msg">
               <div class="flex items-center gap-2 text-blue-400 text-xs font-semibold mb-2">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                 Plan
               </div>
               <div class="prose-msg" data-md>{{ msg.content }}</div>
-              {% if msg.timestamp %}<div class="bubble-time text-[10px] text-slate-400/60 mt-1" data-ts="{{ msg.timestamp }}"></div>{% endif %}
+              {% if msg.timestamp %}<div class="bubble-time text-[10px] text-content-muted/60 mt-1" data-ts="{{ msg.timestamp }}"></div>{% endif %}
             </div>
           </div>
           {% elif msg.role == 'separator' %}
           <div class="flex items-center gap-3 py-2 px-4 separator-line group/sep">
-            <div class="flex-1 border-t border-slate-600/40"></div>
-            <span class="text-xs text-slate-500 whitespace-nowrap">response complete{% if msg.thinking_seconds is not none %} &middot; {{ msg.thinking_seconds }}s{% endif %}</span>
+            <div class="flex-1 border-t border-edge-subtle/40"></div>
+            <span class="text-xs text-content-faint whitespace-nowrap">response complete{% if msg.thinking_seconds is not none %} &middot; {{ msg.thinking_seconds }}s{% endif %}</span>
             <button onclick="rewindSession('{{ active_session.id }}', {{ msg.event_index }})"
-                    class="opacity-0 group-hover/sep:opacity-100 p-0.5 text-slate-500 hover:text-blue-400 transition-opacity" title="Rewind to here">
+                    class="opacity-0 group-hover/sep:opacity-100 p-0.5 text-content-faint hover:text-blue-400 transition-opacity" title="Rewind to here">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/></svg>
             </button>
-            <div class="flex-1 border-t border-slate-600/40"></div>
+            <div class="flex-1 border-t border-edge-subtle/40"></div>
           </div>
           {% endif %}
           {% endfor %}
           <!-- Streaming target -->
           <div id="streaming-msg" class="hidden flex justify-start">
-            <div class="max-w-[90%] overflow-hidden bg-slate-700 rounded-2xl rounded-bl-md px-4 py-2.5 text-sm prose-msg" id="streaming-content"></div>
+            <div class="max-w-[90%] overflow-hidden bg-surface-hover rounded-2xl rounded-bl-md px-4 py-2.5 text-sm prose-msg" id="streaming-content"></div>
           </div>
         </div>
 
         <!-- Thinking indicator -->
-        <div id="thinking" class="hidden px-4 py-2 flex items-center gap-2 text-sm text-slate-400">
+        <div id="thinking" class="hidden px-4 py-2 flex items-center gap-2 text-sm text-content-muted">
           <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse-dot"></span>
           Thinking... <span id="thinking-time">0s</span>
-          <button onclick="cancelMaster()" class="ml-1 p-1 rounded-md hover:bg-slate-700 text-slate-500 hover:text-red-400 transition-colors" title="Stop agent">
+          <button onclick="cancelMaster()" class="ml-1 p-1 rounded-md hover:bg-surface-hover text-content-faint hover:text-red-400 transition-colors" title="Stop agent">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
           </button>
         </div>
 
         <!-- Input -->
-        <div class="border-t border-slate-700 p-4">
+        <div class="border-t border-edge p-4">
           <!-- Uploaded file chips -->
           <div id="file-chips" class="hidden flex flex-wrap gap-1 mb-2"></div>
           <input type="file" id="file-input" multiple class="hidden" onchange="handleFiles(this)">
           <div class="flex gap-2 items-end input-row">
             <span
               id="input-model-badge"
-              class="hidden md:inline text-xs text-slate-400 whitespace-nowrap self-center"
+              class="hidden md:inline text-xs text-content-muted whitespace-nowrap self-center"
             >{{ active_backend_label or active_backend }}</span>
             <div class="flex-1 relative">
               <div id="slash-popup" class="slash-popup"></div>
               <textarea id="msg-input"
                         rows="1"
                         placeholder="Send a message..."
-                        class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:border-blue-500 placeholder-slate-500"
+                        class="w-full bg-surface-input border border-edge-subtle rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:border-blue-500 placeholder-content-faint"
                         onkeydown="handleInputKey(event)"
                         oninput="autoResize(this); saveDraft(); handleSlashInput(this)"></textarea>
             </div>
             <div class="input-buttons flex gap-2">
               <div id="overflow-menu" class="collapsible">
-                <button onclick="document.getElementById('file-input').click()" id="upload-btn" class="p-2.5 rounded-xl bg-slate-800 border border-slate-600 hover:border-slate-500 transition-colors" title="Attach files">
-                  <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                <button onclick="document.getElementById('file-input').click()" id="upload-btn" class="p-2.5 rounded-xl bg-surface-input border border-edge-subtle hover:border-edge transition-colors" title="Attach files">
+                  <svg class="w-5 h-5 text-content-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                 </button>
               </div>
-              <button class="overflow-toggle p-2.5 rounded-xl bg-slate-800 border border-slate-600 hover:border-slate-500 transition-colors" title="More options" onclick="document.getElementById('overflow-menu').classList.toggle('show')">
-                <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+              <button class="overflow-toggle p-2.5 rounded-xl bg-surface-input border border-edge-subtle hover:border-edge transition-colors" title="More options" onclick="document.getElementById('overflow-menu').classList.toggle('show')">
+                <svg class="w-5 h-5 text-content-muted" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
               </button>
-              <button id="voice-btn" onclick="toggleVoice()" class="p-2.5 rounded-xl bg-slate-800 border border-slate-600 hover:border-slate-500 transition-colors" title="Voice input">
-                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-14 0m7 7v4m-4 0h8m-4-18a3 3 0 00-3 3v4a3 3 0 006 0V7a3 3 0 00-3-3z"/></svg>
+              <button id="voice-btn" onclick="toggleVoice()" class="p-2.5 rounded-xl bg-surface-input border border-edge-subtle hover:border-edge transition-colors" title="Voice input">
+                <svg class="w-5 h-5 text-content-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-14 0m7 7v4m-4 0h8m-4-18a3 3 0 00-3 3v4a3 3 0 006 0V7a3 3 0 00-3-3z"/></svg>
               </button>
-              <button onclick="sendMessage()" id="send-btn" class="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 transition-colors" title="Send">
+              <button onclick="sendMessage()" id="send-btn" class="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-colors" title="Send">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>
               </button>
             </div>
@@ -306,38 +340,38 @@
         {% for opt in backend_options %}{% if backend_label_map.update({opt.id: opt.label}) %}{% endif %}{% endfor %}
         {% if threads %}
         {% for t in threads %}
-        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-          <div class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-750" onclick="toggleThreadDetail('{{ t.id }}', '{{ active_session.id }}')">
+        <div class="bg-surface-raised rounded-xl border border-edge overflow-hidden">
+          <div class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-surface-hover" onclick="toggleThreadDetail('{{ t.id }}', '{{ active_session.id }}')">
             <!-- Status badge -->
             {% set status_colors = {
               'running': 'bg-blue-500',
               'completed': 'bg-green-500',
               'failed': 'bg-red-500',
-              'cancelled': 'bg-slate-500',
-              'idle': 'bg-slate-500'
+              'cancelled': 'bg-content-faint',
+              'idle': 'bg-content-faint'
             } %}
-            <span id="thread-dot-{{ t.id }}" class="w-2 h-2 rounded-full flex-shrink-0 {{ status_colors.get(t.status.value, 'bg-slate-500') }} {% if t.status.value == 'running' %}animate-pulse{% endif %}"></span>
+            <span id="thread-dot-{{ t.id }}" class="w-2 h-2 rounded-full flex-shrink-0 {{ status_colors.get(t.status.value, 'bg-content-faint') }} {% if t.status.value == 'running' %}animate-pulse{% endif %}"></span>
             <div class="flex-1 min-w-0">
               <p class="text-sm truncate cursor-pointer hover:text-blue-400 transition-colors" title="Click to view full description" onclick="event.stopPropagation(); showTextModal('Worker Description', this.dataset.full)" data-full="{{ t.description }}">{{ t.description }}</p>
-              <p id="thread-status-{{ t.id }}" class="text-xs text-slate-500">{{ t.status.value }} · {{ t.created_at.strftime("%m/%d %H:%M") }}{% if t.completed_at %} · {{ ((t.completed_at - t.created_at).total_seconds()|int // 60) }}m{{ ((t.completed_at - t.created_at).total_seconds()|int % 60) }}s{% endif %}{% if t.backend %} · {{ backend_label_map.get(t.backend, t.backend) }}{% endif %}</p>
+              <p id="thread-status-{{ t.id }}" class="text-xs text-content-faint">{{ t.status.value }} · {{ t.created_at.strftime("%m/%d %H:%M") }}{% if t.completed_at %} · {{ ((t.completed_at - t.created_at).total_seconds()|int // 60) }}m{{ ((t.completed_at - t.created_at).total_seconds()|int % 60) }}s{% endif %}{% if t.backend %} · {{ backend_label_map.get(t.backend, t.backend) }}{% endif %}</p>
             </div>
             {% if t.status.value == 'running' %}
-            <button onclick="event.stopPropagation(); cancelThread('{{ t.id }}', '{{ active_session.id }}')" class="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-red-400 transition-colors" title="Cancel">
+            <button onclick="event.stopPropagation(); cancelThread('{{ t.id }}', '{{ active_session.id }}')" class="p-1 rounded hover:bg-surface-hover text-content-faint hover:text-red-400 transition-colors" title="Cancel">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
             {% endif %}
-            <svg class="w-4 h-4 text-slate-500 transition-transform thread-chevron" id="chevron-{{ t.id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <svg class="w-4 h-4 text-content-faint transition-transform thread-chevron" id="chevron-{{ t.id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </div>
           <!-- Expandable detail -->
-          <div id="thread-detail-{{ t.id }}" class="hidden border-t border-slate-700">
+          <div id="thread-detail-{{ t.id }}" class="hidden border-t border-edge">
             <div id="thread-events-{{ t.id }}" class="p-4 max-h-96 overflow-y-auto">
-              <p class="text-xs text-slate-500">Loading events...</p>
+              <p class="text-xs text-content-faint">Loading events...</p>
             </div>
           </div>
         </div>
         {% endfor %}
         {% else %}
-        <div id="no-workers-placeholder" class="flex items-center justify-center h-full text-slate-500 text-sm">No worker threads</div>
+        <div id="no-workers-placeholder" class="flex items-center justify-center h-full text-content-faint text-sm">No worker threads</div>
         {% endif %}
       </div>
 
@@ -347,41 +381,41 @@
 
       <div id="latex-panel" class="hidden latex-panel flex flex-col" style="width: 60%">
         <!-- Panel header -->
-        <div class="flex items-center gap-2 px-4 py-2 border-b border-slate-700 bg-slate-800/50">
-          <div class="flex gap-1 bg-slate-800 rounded-lg p-0.5">
+        <div class="flex items-center gap-2 px-4 py-2 border-b border-edge bg-surface-raised/50">
+          <div class="flex gap-1 bg-surface-raised rounded-lg p-0.5">
             <button onclick="switchLatexView('pdf')" id="btn-latex-pdf" class="px-3 py-1 text-xs rounded-md font-medium transition-colors latex-toggle-active">PDF</button>
-            <button onclick="switchLatexView('tex')" id="btn-latex-tex" class="px-3 py-1 text-xs rounded-md font-medium transition-colors text-slate-400 hover:text-slate-200">TeX</button>
+            <button onclick="switchLatexView('tex')" id="btn-latex-tex" class="px-3 py-1 text-xs rounded-md font-medium transition-colors text-content-muted hover:text-content-sec">TeX</button>
           </div>
-          <button onclick="compileLatex()" id="btn-compile" class="px-3 py-1.5 text-xs rounded-lg bg-green-700 hover:bg-green-600 font-medium transition-colors">Compile</button>
-          <span id="compile-status" class="text-xs text-slate-500"></span>
-          <span id="latex-git-info" class="text-xs text-slate-400 font-mono" title=""></span>
+          <button onclick="compileLatex()" id="btn-compile" class="px-3 py-1.5 text-xs rounded-lg bg-green-700 hover:bg-green-600 text-white font-medium transition-colors">Compile</button>
+          <span id="compile-status" class="text-xs text-content-faint"></span>
+          <span id="latex-git-info" class="text-xs text-content-muted font-mono" title=""></span>
           <div class="flex-1"></div>
-          <button onclick="toggleLatexPanel()" class="text-slate-500 hover:text-slate-300 p-1" title="Close panel">
+          <button onclick="toggleLatexPanel()" class="text-content-faint hover:text-content-sec p-1" title="Close panel">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
         <!-- PDF view -->
         <div id="latex-pdf-view" class="flex-1 min-h-0">
-          <div id="latex-pdf-canvas-container" class="w-full h-full overflow-auto bg-slate-900 flex flex-col items-center gap-2 p-2"></div>
+          <div id="latex-pdf-canvas-container" class="w-full h-full overflow-auto bg-surface-base flex flex-col items-center gap-2 p-2"></div>
         </div>
         <!-- TeX source view -->
         <div id="latex-tex-view" class="flex-1 min-h-0 hidden overflow-auto">
-          <textarea id="latex-editor" class="w-full h-full bg-slate-900 text-slate-200 font-mono text-sm p-4 resize-none focus:outline-none" spellcheck="false"></textarea>
+          <textarea id="latex-editor" class="w-full h-full bg-surface-base text-content-sec font-mono text-sm p-4 resize-none focus:outline-none" spellcheck="false"></textarea>
         </div>
       </div>
       <div id="backlog-resize-handle" class="resize-handle" style="display:none"></div>
 
       <!-- ===== BACKLOG PANEL ===== -->
-      <div id="backlog-panel" class="hidden flex flex-col bg-gray-900 border-l border-gray-700 overflow-hidden" style="width: 40%">
-        <div class="flex items-center justify-between px-4 py-2 border-b border-gray-700 bg-gray-800">
+      <div id="backlog-panel" class="hidden flex flex-col bg-surface-base border-l border-edge overflow-hidden" style="width: 40%">
+        <div class="flex items-center justify-between px-4 py-2 border-b border-edge bg-surface-raised">
           <select id="backlog-repo-selector" onchange="backlogPanel.switchRepo(this.value)"
-                  class="text-sm font-medium bg-gray-800 text-gray-300 rounded px-2 py-1 border border-gray-600 focus:outline-none"></select>
+                  class="text-sm font-medium bg-surface-raised text-content-sec rounded px-2 py-1 border border-edge-subtle focus:outline-none"></select>
           <div class="flex gap-2 items-center">
-            <button onclick="backlogPanel.refresh()" class="text-xs text-gray-400 hover:text-white transition-colors">Refresh</button>
-            <select id="backlog-module-filter" onchange="backlogPanel.render()" class="text-xs bg-gray-700 text-gray-300 rounded px-2 py-1 border border-gray-600 focus:outline-none">
+            <button onclick="backlogPanel.refresh()" class="text-xs text-content-muted hover:text-content transition-colors">Refresh</button>
+            <select id="backlog-module-filter" onchange="backlogPanel.render()" class="text-xs bg-surface-hover text-content-sec rounded px-2 py-1 border border-edge-subtle focus:outline-none">
               <option value="all">All modules</option>
             </select>
-            <select id="backlog-filter" onchange="backlogPanel.render()" class="text-xs bg-gray-700 text-gray-300 rounded px-2 py-1 border border-gray-600 focus:outline-none">
+            <select id="backlog-filter" onchange="backlogPanel.render()" class="text-xs bg-surface-hover text-content-sec rounded px-2 py-1 border border-edge-subtle focus:outline-none">
               <option value="pending">Active</option>
               <option value="all">All</option>
               <option value="done">Done</option>
@@ -396,17 +430,17 @@
 
       {% else %}
       <!-- No active session -->
-      <header class="flex items-center border-b border-slate-700 bg-slate-800/50 px-4 py-3">
-        <button class="hamburger-btn p-2 -ml-2 mr-1 rounded-lg hover:bg-slate-700 transition-colors" onclick="toggleMobileSidebar()" title="Menu">
-          <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <header class="flex items-center border-b border-edge bg-surface-raised/50 px-4 py-3">
+        <button class="hamburger-btn p-2 -ml-2 mr-1 rounded-lg hover:bg-surface-hover transition-colors" onclick="toggleMobileSidebar()" title="Menu">
+          <svg class="w-5 h-5 text-content-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        <h2 class="text-sm font-semibold text-slate-400">CharlieBot</h2>
+        <h2 class="text-sm font-semibold text-content-muted">CharlieBot</h2>
       </header>
       <div class="flex-1 flex items-center justify-center">
         <div class="text-center">
-          <h2 class="text-xl font-semibold text-slate-400 mb-2">Welcome to CharlieBot</h2>
-          <p class="text-slate-500 mb-4">Create or select a session to get started</p>
-          <button onclick="createSession()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition-colors">New Session</button>
+          <h2 class="text-xl font-semibold text-content-muted mb-2">Welcome to CharlieBot</h2>
+          <p class="text-content-faint mb-4">Create or select a session to get started</p>
+          <button onclick="createSession()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors">New Session</button>
         </div>
       </div>
       {% endif %}
@@ -414,9 +448,10 @@
   </div>
 
   <!-- ==================== RENAME INPUT (floating) ==================== -->
-  <input id="rename-input" class="hidden fixed z-50 bg-slate-800 border border-blue-500 rounded-lg px-3 py-1.5 text-sm focus:outline-none" onkeydown="handleRenameKey(event)" onblur="commitRename()">
+  <input id="rename-input" class="hidden fixed z-50 bg-surface-input border border-blue-500 rounded-lg px-3 py-1.5 text-sm text-content focus:outline-none" onkeydown="handleRenameKey(event)" onblur="commitRename()">
 
   <!-- ==================== JAVASCRIPT ==================== -->
+  <script src="/static/js/theme.js"></script>
   <script src="/static/js/platform.js"></script>
   <script src="/static/js/markdown-renderer.js"></script>
   <script src="/static/js/config.js"></script>
@@ -437,46 +472,46 @@
   <div id="cron-modal" class="diff-modal-overlay hidden">
     <div class="diff-modal" style="width: 90vw; max-width: 900px; height: 85vh;">
       <div class="diff-modal-header">
-        <span class="text-sm font-semibold text-slate-200" id="cron-modal-title">Edit Scheduled Task</span>
-        <button onclick="closeCronModal()" class="text-slate-500 hover:text-slate-300 p-1">✕</button>
+        <span class="text-sm font-semibold text-content-sec" id="cron-modal-title">Edit Scheduled Task</span>
+        <button onclick="closeCronModal()" class="text-content-faint hover:text-content-sec p-1">&#x2715;</button>
       </div>
       <div class="diff-modal-body" style="padding: 1rem; overflow-y: auto; flex: 1;">
         <form id="cron-form" class="flex flex-col gap-3 h-full">
           <div>
-            <label class="block text-xs text-slate-400 mb-1">Name</label>
-            <input id="cron-name" type="text" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-sm text-slate-200" />
+            <label class="block text-xs text-content-muted mb-1">Name</label>
+            <input id="cron-name" type="text" class="w-full bg-surface-input border border-edge-subtle rounded px-2 py-1.5 text-sm text-content-sec" />
           </div>
           <div>
-            <label class="block text-xs text-slate-400 mb-1">Cron Expression</label>
-            <input id="cron-expr" type="text" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-sm text-slate-200 font-mono" placeholder="0 2 * * *" />
+            <label class="block text-xs text-content-muted mb-1">Cron Expression</label>
+            <input id="cron-expr" type="text" class="w-full bg-surface-input border border-edge-subtle rounded px-2 py-1.5 text-sm text-content-sec font-mono" placeholder="0 2 * * *" />
           </div>
           <div class="flex flex-col flex-1">
-            <label class="block text-xs text-slate-400 mb-1">Prompt</label>
-            <textarea id="cron-prompt" class="w-full flex-1 bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-sm text-slate-200" style="min-height: 120px;"></textarea>
+            <label class="block text-xs text-content-muted mb-1">Prompt</label>
+            <textarea id="cron-prompt" class="w-full flex-1 bg-surface-input border border-edge-subtle rounded px-2 py-1.5 text-sm text-content-sec" style="min-height: 120px;"></textarea>
           </div>
           <div>
-            <label class="block text-xs text-slate-400 mb-1">Repo (optional)</label>
-            <input id="cron-repo" type="text" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-sm text-slate-200" placeholder="~/workspace/my-repo" />
+            <label class="block text-xs text-content-muted mb-1">Repo (optional)</label>
+            <input id="cron-repo" type="text" class="w-full bg-surface-input border border-edge-subtle rounded px-2 py-1.5 text-sm text-content-sec" placeholder="~/workspace/my-repo" />
           </div>
           <div>
-            <label class="block text-xs text-slate-400 mb-1">Project (optional)</label>
-            <input id="cron-project" type="text" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-sm text-slate-200" placeholder="e.g. alpha-lab" />
+            <label class="block text-xs text-content-muted mb-1">Project (optional)</label>
+            <input id="cron-project" type="text" class="w-full bg-surface-input border border-edge-subtle rounded px-2 py-1.5 text-sm text-content-sec" placeholder="e.g. alpha-lab" />
           </div>
           <div>
-            <label class="block text-xs text-slate-400 mb-1">Timezone</label>
-            <input id="cron-timezone" type="text" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-sm text-slate-200" value="America/New_York" />
+            <label class="block text-xs text-content-muted mb-1">Timezone</label>
+            <input id="cron-timezone" type="text" class="w-full bg-surface-input border border-edge-subtle rounded px-2 py-1.5 text-sm text-content-sec" value="America/New_York" />
           </div>
           <div class="flex items-center gap-2">
-            <input id="cron-enabled" type="checkbox" checked class="rounded bg-slate-800 border-slate-600" />
-            <label for="cron-enabled" class="text-xs text-slate-400">Enabled</label>
+            <input id="cron-enabled" type="checkbox" checked class="rounded bg-surface-input border-edge-subtle" />
+            <label for="cron-enabled" class="text-xs text-content-muted">Enabled</label>
           </div>
         </form>
       </div>
       <div class="diff-modal-footer">
-        <button onclick="deleteCronTask()" id="cron-delete-btn" class="px-4 py-1.5 text-sm rounded-lg bg-red-800 hover:bg-red-700 text-slate-200 font-medium hidden">Delete</button>
+        <button onclick="deleteCronTask()" id="cron-delete-btn" class="px-4 py-1.5 text-sm rounded-lg bg-red-800 hover:bg-red-700 text-white font-medium hidden">Delete</button>
         <div class="flex-1"></div>
-        <button onclick="closeCronModal()" class="px-4 py-1.5 text-sm rounded-lg bg-slate-600 hover:bg-slate-500 text-slate-200 font-medium">Cancel</button>
-        <button onclick="saveCronTask()" class="px-4 py-1.5 text-sm rounded-lg bg-green-700 hover:bg-green-600 text-slate-200 font-medium">Save</button>
+        <button onclick="closeCronModal()" class="px-4 py-1.5 text-sm rounded-lg bg-surface-hover hover:bg-edge text-content-sec font-medium">Cancel</button>
+        <button onclick="saveCronTask()" class="px-4 py-1.5 text-sm rounded-lg bg-green-700 hover:bg-green-600 text-white font-medium">Save</button>
       </div>
     </div>
   </div>
@@ -484,11 +519,11 @@
   <div id="text-modal-overlay" class="diff-modal-overlay" style="display:none" onclick="closeTextModal()">
     <div class="diff-modal" style="max-width:700px" onclick="event.stopPropagation()">
       <div class="diff-modal-header">
-        <span id="text-modal-title" class="text-sm font-semibold text-slate-200">Worker Description</span>
-        <button onclick="closeTextModal()" class="text-slate-500 hover:text-slate-300 p-1" title="Close">&#x2715;</button>
+        <span id="text-modal-title" class="text-sm font-semibold text-content-sec">Worker Description</span>
+        <button onclick="closeTextModal()" class="text-content-faint hover:text-content-sec p-1" title="Close">&#x2715;</button>
       </div>
       <div class="diff-modal-body p-4">
-        <pre id="text-modal-content" class="text-sm text-slate-300 whitespace-pre-wrap break-words"></pre>
+        <pre id="text-modal-content" class="text-sm text-content-sec whitespace-pre-wrap break-words"></pre>
       </div>
     </div>
   </div>
@@ -496,13 +531,13 @@
   <div id="diff-modal" class="diff-modal-overlay hidden">
     <div class="diff-modal">
       <div class="diff-modal-header">
-        <span class="text-sm font-semibold text-slate-200">AI proposed changes to TeX source</span>
-        <button onclick="rejectTexEdit()" class="text-slate-500 hover:text-slate-300 p-1" title="Close">✕</button>
+        <span class="text-sm font-semibold text-content-sec">AI proposed changes to TeX source</span>
+        <button onclick="rejectTexEdit()" class="text-content-faint hover:text-content-sec p-1" title="Close">&#x2715;</button>
       </div>
       <div class="diff-modal-body" id="diff-modal-body"></div>
       <div class="diff-modal-footer">
-        <button onclick="rejectTexEdit()" class="px-4 py-1.5 text-sm rounded-lg bg-slate-600 hover:bg-slate-500 font-medium transition-colors">Reject</button>
-        <button onclick="acceptTexEdit()" class="px-4 py-1.5 text-sm rounded-lg bg-green-700 hover:bg-green-600 font-medium transition-colors">Accept</button>
+        <button onclick="rejectTexEdit()" class="px-4 py-1.5 text-sm rounded-lg bg-surface-hover hover:bg-edge font-medium transition-colors">Reject</button>
+        <button onclick="acceptTexEdit()" class="px-4 py-1.5 text-sm rounded-lg bg-green-700 hover:bg-green-600 text-white font-medium transition-colors">Accept</button>
       </div>
     </div>
   </div>

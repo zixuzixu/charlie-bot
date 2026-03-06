@@ -53,7 +53,7 @@ async function startRecording() {
     mediaRecorder.start(100);
     isRecording = true;
     document.getElementById('voice-btn').classList.add('bg-red-600', 'border-red-500');
-    document.getElementById('voice-btn').classList.remove('bg-slate-800', 'border-slate-600');
+    document.getElementById('voice-btn').classList.remove('bg-surface-raised', 'border-edge-subtle');
   } catch (err) {
     console.error('Mic access failed:', err);
     alert('Microphone access failed. Make sure you are using HTTPS and have granted microphone permission.');
@@ -66,7 +66,7 @@ function stopRecording() {
   }
   isRecording = false;
   document.getElementById('voice-btn').classList.remove('bg-red-600', 'border-red-500');
-  document.getElementById('voice-btn').classList.add('bg-slate-800', 'border-slate-600');
+  document.getElementById('voice-btn').classList.add('bg-surface-raised', 'border-edge-subtle');
 }
 
 function resetVoiceState() {

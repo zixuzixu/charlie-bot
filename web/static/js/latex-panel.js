@@ -23,17 +23,17 @@ function switchLatexView(view) {
     pdfView.classList.remove('hidden');
     texView.classList.add('hidden');
     pdfBtn.classList.add('latex-toggle-active');
-    pdfBtn.classList.remove('text-slate-400');
+    pdfBtn.classList.remove('text-content-muted');
     texBtn.classList.remove('latex-toggle-active');
-    texBtn.classList.add('text-slate-400');
+    texBtn.classList.add('text-content-muted');
     loadLatexPdf();
   } else {
     pdfView.classList.add('hidden');
     texView.classList.remove('hidden');
     texBtn.classList.add('latex-toggle-active');
-    texBtn.classList.remove('text-slate-400');
+    texBtn.classList.remove('text-content-muted');
     pdfBtn.classList.remove('latex-toggle-active');
-    pdfBtn.classList.add('text-slate-400');
+    pdfBtn.classList.add('text-content-muted');
     loadLatexSource();
   }
 }
@@ -43,7 +43,7 @@ async function loadLatexPdf() {
   if (!container) return;
   // Skip re-fetch if PDF is already rendered (preserves scroll position)
   if (container.querySelector('canvas')) return;
-  container.innerHTML = '<p class="text-slate-500 text-sm">Loading PDF...</p>';
+  container.innerHTML = '<p class="text-content-faint text-sm">Loading PDF...</p>';
   try {
     const resp = await fetch('/api/latex/pdf?t=' + Date.now());
     if (!resp.ok) { container.innerHTML = '<p class="text-red-400 text-sm">PDF not found. Compile first.</p>'; return; }
@@ -146,7 +146,7 @@ async function compileLatex() {
   } finally {
     btn.disabled = false;
     btn.textContent = 'Compile';
-    setTimeout(() => { status.textContent = ''; status.className = 'text-xs text-slate-500'; }, 5000);
+    setTimeout(() => { status.textContent = ''; status.className = 'text-xs text-content-faint'; }, 5000);
   }
 }
 
