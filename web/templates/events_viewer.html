@@ -4,26 +4,68 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Events — {{ session.name }} — CharlieBot</title>
+  <script>
+    (function() {
+      var t = localStorage.getItem('charliebot-theme');
+      if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
-      theme: { extend: { colors: { slate: { 850: '#172033' } } } }
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              base: 'rgb(var(--s-base) / <alpha-value>)',
+              sidebar: 'rgb(var(--s-sidebar) / <alpha-value>)',
+              raised: 'rgb(var(--s-raised) / <alpha-value>)',
+              input: 'rgb(var(--s-input) / <alpha-value>)',
+              hover: 'rgb(var(--s-hover) / <alpha-value>)',
+            },
+            edge: {
+              DEFAULT: 'rgb(var(--b-primary) / <alpha-value>)',
+              subtle: 'rgb(var(--b-subtle) / <alpha-value>)',
+            },
+            content: {
+              DEFAULT: 'rgb(var(--t-primary) / <alpha-value>)',
+              sec: 'rgb(var(--t-secondary) / <alpha-value>)',
+              muted: 'rgb(var(--t-muted) / <alpha-value>)',
+              faint: 'rgb(var(--t-faint) / <alpha-value>)',
+            },
+          },
+        },
+      },
     };
   </script>
+  <link rel="stylesheet" href="/static/css/styles.css">
   <style>
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    /* JSON syntax highlighting — works in both themes via CSS variables */
+    .json-key    { color: var(--json-key); }
+    .json-str    { color: var(--json-str); }
+    .json-num    { color: var(--json-num); }
+    .json-bool   { color: var(--json-bool); }
+    .json-null   { color: var(--json-null); }
 
-    /* JSON syntax highlighting */
-    .json-key    { color: #7dd3fc; }  /* sky-300 */
-    .json-str    { color: #86efac; }  /* green-300 */
-    .json-num    { color: #fda4af; }  /* rose-300 */
-    .json-bool   { color: #fdba74; }  /* orange-300 */
-    .json-null   { color: #94a3b8; }  /* slate-400 */
+    :root {
+      --json-key:  #0550ae;
+      --json-str:  #116329;
+      --json-num:  #cf222e;
+      --json-bool: #953800;
+      --json-null: #64748b;
+    }
+    .dark {
+      --json-key:  #7dd3fc;
+      --json-str:  #86efac;
+      --json-num:  #fda4af;
+      --json-bool: #fdba74;
+      --json-null: #94a3b8;
+    }
 
-    /* Event type badge colours */
+    /* Event type badge colours — fixed accent colours, work in both themes */
     .badge-user      { background: #1d4ed8; color: #bfdbfe; }
     .badge-assistant { background: #166534; color: #bbf7d0; }
     .badge-master_done { background: #14532d; color: #86efac; }
@@ -31,64 +73,64 @@
     .badge-task_delegated { background: #581c87; color: #e9d5ff; }
     .badge-worker_summary { background: #4c1d95; color: #ddd6fe; }
     .badge-assistant_error { background: #7f1d1d; color: #fca5a5; }
-    .badge-ping      { background: #1e293b; color: #64748b; }
-    .badge-default   { background: #1e293b; color: #94a3b8; }
+    .badge-ping      { background: rgb(var(--s-raised)); color: rgb(var(--t-faint)); }
+    .badge-default   { background: rgb(var(--s-raised)); color: rgb(var(--t-muted)); }
 
-    .event-row { border-bottom: 1px solid #1e293b; }
+    .event-row { border-bottom: 1px solid rgb(var(--s-raised)); }
     .event-row:last-child { border-bottom: none; }
-    .event-row:hover { background: #0f172a; }
+    .event-row:hover { background: rgb(var(--s-raised) / 0.5); }
 
     pre { white-space: pre-wrap; word-break: break-all; }
   </style>
 </head>
-<body class="dark bg-slate-900 text-slate-100 min-h-screen">
+<body class="bg-surface-base text-content min-h-screen">
 
   <!-- Top bar -->
-  <header class="sticky top-0 z-10 bg-slate-850 border-b border-slate-700 flex items-center gap-3 px-4 py-3">
+  <header class="sticky top-0 z-10 bg-surface-sidebar border-b border-edge flex items-center gap-3 px-4 py-3">
     <a href="/?session={{ session_id }}"
-       class="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 transition-colors text-sm">
+       class="flex items-center gap-1.5 text-content-muted hover:text-content-sec transition-colors text-sm">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
       </svg>
       Back
     </a>
-    <div class="h-4 w-px bg-slate-700"></div>
-    <h1 class="text-sm font-semibold text-slate-200 truncate flex-1">
-      <span class="text-slate-500 mr-1">Events:</span>{{ session.name }}
+    <div class="h-4 w-px bg-edge"></div>
+    <h1 class="text-sm font-semibold text-content-sec truncate flex-1">
+      <span class="text-content-faint mr-1">Events:</span>{{ session.name }}
     </h1>
     <a href="{{ events_url }}" download
-       class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors px-2 py-1 rounded border border-slate-700 hover:border-slate-600">
+       class="flex items-center gap-1.5 text-xs text-content-faint hover:text-content-sec transition-colors px-2 py-1 rounded border border-edge hover:border-edge-subtle">
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
       </svg>
       Download JSONL
     </a>
-    <span id="event-count" class="text-xs text-slate-500"></span>
+    <span id="event-count" class="text-xs text-content-faint"></span>
   </header>
 
   <!-- Filter bar -->
-  <div class="border-b border-slate-800 px-4 py-2 flex items-center gap-3 bg-slate-900/80 sticky top-14 z-10">
-    <label class="text-xs text-slate-500">Filter by type:</label>
+  <div class="border-b border-edge/60 px-4 py-2 flex items-center gap-3 bg-surface-base/80 sticky top-14 z-10">
+    <label class="text-xs text-content-faint">Filter by type:</label>
     <input id="type-filter"
            type="text"
            placeholder="e.g. user, assistant, result …"
-           class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500 text-slate-300 placeholder-slate-600 w-48">
-    <label class="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer select-none">
+           class="bg-surface-input border border-edge rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500 text-content-sec placeholder-content-faint w-48">
+    <label class="flex items-center gap-1.5 text-xs text-content-muted cursor-pointer select-none">
       <input id="expand-all" type="checkbox" class="accent-blue-500">
       Expand all
     </label>
     <button onclick="clearFilter()"
-            class="text-xs text-slate-500 hover:text-slate-300 transition-colors">Clear</button>
+            class="text-xs text-content-faint hover:text-content-sec transition-colors">Clear</button>
   </div>
 
   <!-- Event list -->
-  <div id="event-list" class="divide-y divide-slate-800/60">
+  <div id="event-list" class="divide-y divide-edge/60">
     <!-- populated by JS -->
   </div>
 
   <!-- Loading / error states -->
-  <div id="loading" class="flex items-center justify-center py-16 text-slate-500 text-sm gap-2">
+  <div id="loading" class="flex items-center justify-center py-16 text-content-faint text-sm gap-2">
     <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
@@ -96,8 +138,9 @@
     Loading events…
   </div>
   <div id="error-msg" class="hidden text-center py-16 text-red-400 text-sm"></div>
-  <div id="empty-msg" class="hidden text-center py-16 text-slate-500 text-sm">No events found.</div>
+  <div id="empty-msg" class="hidden text-center py-16 text-content-faint text-sm">No events found.</div>
 
+  <script src="/static/js/theme.js"></script>
   <script>
     // -------------------------------------------------------------------------
     // Constants
@@ -183,13 +226,13 @@
 
         row.innerHTML = `
           <div class="flex items-center gap-2 min-w-0">
-            <span class="text-xs font-mono text-slate-600 w-8 flex-shrink-0 text-right">${idx + 1}</span>
+            <span class="text-xs font-mono text-content-faint w-8 flex-shrink-0 text-right">${idx + 1}</span>
             <span class="text-xs px-1.5 py-0.5 rounded font-mono flex-shrink-0 ${badgeCls}">${escapeHtml(type)}</span>
-            ${ts ? `<span class="text-xs text-slate-600 flex-shrink-0 font-mono">${ts}</span>` : ''}
-            ${summary ? `<span class="text-xs text-slate-400 truncate">${escapeHtml(summary)}</span>` : ''}
+            ${ts ? `<span class="text-xs text-content-faint flex-shrink-0 font-mono">${ts}</span>` : ''}
+            ${summary ? `<span class="text-xs text-content-muted truncate">${escapeHtml(summary)}</span>` : ''}
           </div>
           <div class="json-body ${expandAll ? '' : 'hidden'} mt-2 ml-10">
-            <pre class="text-xs bg-slate-800 rounded p-3 overflow-x-auto leading-5">${syntaxHighlight(ev)}</pre>
+            <pre class="text-xs bg-surface-raised rounded p-3 overflow-x-auto leading-5">${syntaxHighlight(ev)}</pre>
           </div>`;
 
         row.addEventListener('click', () => {
