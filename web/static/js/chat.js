@@ -65,7 +65,7 @@ function appendMessage(role, content, isVoice, timestamp) {
 
   if (role === 'user') {
     div.className = 'flex justify-end';
-    div.innerHTML = `<div class="max-w-[75%] overflow-hidden bg-blue-600 rounded-2xl rounded-br-md px-4 py-2.5 text-sm">
+    div.innerHTML = `<div class="max-w-[75%] overflow-hidden user-bubble rounded-2xl rounded-br-md px-4 py-2.5 text-sm">
       ${isVoice ? '<span class="text-xs text-blue-200 block mb-1">&#127908; Voice</span>' : ''}
       <div class="whitespace-pre-wrap">${escapeHtml(content)}</div>${timeHtml}</div>`;
   } else if (role === 'assistant') {

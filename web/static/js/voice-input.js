@@ -86,7 +86,7 @@ async function transcribeAudio(blob) {
   const placeholder = document.createElement('div');
   placeholder.id = 'voice-transcribing';
   placeholder.className = 'flex justify-end';
-  placeholder.innerHTML = `<div class="max-w-[75%] overflow-hidden bg-blue-600 rounded-2xl rounded-br-md px-4 py-2.5 text-sm">
+  placeholder.innerHTML = `<div class="max-w-[75%] overflow-hidden user-bubble rounded-2xl rounded-br-md px-4 py-2.5 text-sm">
     <span class="text-xs text-blue-200 block mb-1">&#127908; Voice</span>
     <div class="flex items-center gap-2 text-blue-200">
       <svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
